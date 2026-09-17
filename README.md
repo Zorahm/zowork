@@ -6,7 +6,9 @@ If you've read through them and like what you see, feel free to use them. Just k
 
 ## Installation
 
-This is a [Claude Code](https://claude.com/claude-code) plugin marketplace. Add it and install the plugin from within Claude Code:
+This is a [Claude Code](https://claude.com/claude-code) plugin marketplace.
+
+### CLI
 
 ```
 /plugin marketplace add zorahm/zowork
@@ -19,6 +21,10 @@ Or, from a local clone:
 /plugin marketplace add /path/to/zowork
 /plugin install zowork@zowork
 ```
+
+### claude.ai (Desktop, Web)
+
+Not available on mobile. In the app: **Code** tab → **Customize** → **Plugins** tab → **Add** → **Marketplace** → **From GitHub**, then enter `zorahm/zowork`.
 
 ## License
 
