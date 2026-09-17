@@ -1,0 +1,14 @@
+{
+  "name": "zowork",
+  "description": "Личный маркетплейс ZorahM с одним плагином: zowork",
+  "owner": { "name": "ZorahM", "url": "https://github.com/zorahm" },
+  "plugins": [
+    {
+      "name": "zowork",
+      "description": "Личный набор скиллов и автоматизаций ZorahM: кэш промпт-гайдов Anthropic, правила git/GitHub для соло-разработки, общие правила работы над проектами и делегирование задач агенту Antigravity",
+      "version": "0.4.0",
+      "source": "./",
+      "author": { "name": "ZorahM", "url": "https://github.com/zorahm" }
+    }
+  ]
+}
