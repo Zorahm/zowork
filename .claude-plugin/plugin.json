@@ -2,8 +2,11 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "zowork",
   "displayName": "ZoWork",
-  "version": "0.4.0",
-  "description": "Личный набор скиллов и автоматизаций ZorahM: кэш промпт-гайдов Anthropic, правила git/GitHub для соло-разработки, общие правила работы над проектами и делегирование задач агенту Antigravity",
-  "author": { "name": "ZorahM", "url": "https://github.com/zorahm" },
+  "version": "0.5.0",
+  "description": "ZorahM's personal skills and automations: working rules injected at session start, a cache of Anthropic's prompting guides, git/GitHub rules for solo development, and task delegation to the Antigravity agent",
+  "author": {
+    "name": "ZorahM",
+    "url": "https://github.com/zorahm"
+  },
   "license": "MIT"
 }
