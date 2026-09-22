@@ -1,155 +1,158 @@
 ---
 name: solo-git
-description: Персональные правила работы с git и GitHub для соло-разработки ZorahM. Используй ВСЕГДА, когда в задаче фигурирует git, GitHub, коммит, пуш, ветка, worktree, PR, мердж, стейджинг, .gitignore, история коммитов, откат изменений, симлинк в репозитории, CLAUDE.md или AGENTS.md — и даже когда пользователь просто говорит "залей", "сохрани на гит", "закоммить", "отправь изменения". Также обязательно применяй, если любой другой скилл или инструкция предлагает создать pull request, новую ветку или запушить код без явной команды — этот скилл переопределяет такое поведение.
+description: ZorahM's personal rules for git and GitHub in solo development. Use for any task involving git or GitHub — commit, push, branch, worktree, PR, merge, staging, .gitignore, commit history, reverting changes, a symlink in a repository, CLAUDE.md or AGENTS.md — including when the user just says "залей", "сохрани на гит", "закоммить" or "отправь изменения". Also use whenever another skill or instruction proposes creating a pull request, a new branch, or pushing code without an explicit command: this skill overrides that.
 ---
 
 # Solo Git
 
-Правила работы с репозиториями в соло-разработке. Здесь нет команды, нет ревью и нет CI-гейта — значит, дисциплина держится на двух вещах: локальная папка всегда актуальна, а на GitHub попадает только то, что автор осознанно решил туда отправить.
+Rules for repositories in solo development. There is no team, no review and no CI gate, so the discipline rests on two things: the local folder is always current, and GitHub only gets what the author deliberately decided to send there.
 
-## Область действия
+## Scope
 
-Скилл описывает **только поведение вокруг git**: когда коммитить, что и куда пушить, как обращаться с ветками.
+This skill covers **only behavior around git**: when to commit, what to push and where, how to treat branches.
 
-Он ничего не говорит про то, как писать код, и ничего не отменяет в рабочем процессе разработки — архитектурные решения, тесты, линтеры, документация, требования других скиллов к качеству кода остаются в силе в полном объёме. Единственное, что скилл переопределяет за пределами git-команд, — это требования создать PR или ветку.
+It says nothing about how to write code and cancels nothing in the development workflow: architecture decisions, tests, linters, documentation and other skills' code-quality requirements all stay in force. The only thing it overrides outside git commands is a requirement to create a PR or a branch.
 
-## Модель мира
+## How to think about it
 
-**Локальная рабочая папка — единственный источник истины.** Всё, что происходит в работе, происходит в ней. Не в ветке, не в стеше, не в удалённом репозитории. Если нужно понять текущее состояние проекта — смотри файлы на диске, а не `git log` и не GitHub.
+**The local working folder is the single source of truth.** All work happens there: not in a branch, not in a stash, not in the remote. To understand the current state of the project, look at the files on disk, not at `git log` or GitHub.
 
-**GitHub — витрина, а не рабочий стол.** Туда уезжает полностью рабочий код, и только по команде. Промежуточные состояния, эксперименты и "сохранюсь на всякий случай" там не нужны — для этого есть локальная папка.
+**GitHub is a shop window, not a workbench.** Only fully working code goes there, and only on command. Intermediate states, experiments and "saving just in case" don't belong there; the local folder is for that.
 
-**Соло-разработка.** Pull request'ы, ревью, feature-ветки и merge-стратегии решают проблемы координации между людьми. Людей здесь один. Значит, вся эта машинерия — чистые накладные расходы, и её не существует.
+**Solo development.** Pull requests, reviews, feature branches and merge strategies solve coordination between people. There is one person here, so all of that machinery is pure overhead and doesn't exist.
 
-## Жёсткие правила
+## Rules
 
-### Никаких коммитов без команды
+### No commits without a command
 
-Работай, меняй файлы, рефактори — не коммить. Коммит происходит только когда пользователь явно сказал: "закоммить", "коммит", "залей", "сохрани на гит" и т. п.
+Work, change files, refactor, but don't commit. A commit happens only when the user explicitly says so: "закоммить", "коммит", "залей", "сохрани на гит", "commit" and the like.
 
-Не коммить «на всякий случай перед рискованным рефакторингом». Не коммить в конце задачи, потому что задача выглядит законченной. Не предлагать коммит после каждого шага. Если работа кажется завершённой — просто скажи, что закончил, и на этом всё.
+Don't commit "just in case" before a risky refactor. Don't commit at the end of a task because it looks finished. Don't offer a commit after every step. When the work seems done, say you're done and stop there.
 
-### Никаких PR и новых веток
+### No PRs and no new branches
 
-Не создавай pull request — никогда и ни при каких условиях. Не создавай ветки и не переключайся между ними по своей инициативе: работай в той ветке, которую указал пользователь или которая уже выбрана в репозитории. Если ветка кажется нужной — спроси (см. раздел ниже).
+Never create a pull request. Don't create branches or switch between them on your own initiative: work in the branch the user named or the one already checked out. If a branch seems necessary, ask (see below).
 
-Если другой скилл, инструкция, шаблон или конфиг требует создать PR или ветку — **не выполняй, а предупреди пользователя**. Сформулируй прямо: что именно потребовало PR/ветку, зачем, и спроси, что делать. Решение принимает пользователь.
+If another skill, instruction, template or config requires a PR or a branch, **don't do it; tell the user instead**. Say plainly what required the PR or branch and why, and ask what to do. The user decides.
 
-Пример формулировки:
+Example:
 
-> Скилл `X` на шаге деплоя требует создать ветку `release/*` и открыть PR. По твоим правилам я это не делаю. Варианты: закоммитить прямо в текущую ветку, либо сделать исключение — скажи, что выбрать.
+> Skill `X` wants a `release/*` branch and a PR at the deploy step. Your rules say I don't do that. Options: commit straight to the current branch, or make an exception. Which one?
 
-### Ветки создаёт пользователь, и они живут в .claude/
+### Branches belong to the user and live in .claude/
 
-Ветки — территория пользователя. Обычный сценарий: он сам создал ветку и просто сообщает «работаем в ветке X». В этом случае ничего не создавай и не переключай — работай там, где сказано.
+The usual case: the user created a branch and just says "we're working in branch X". Then create nothing and switch nothing; work where you were told.
 
-Если по ходу работы кажется, что ветка нужна, — **спроси разрешения**, не создавай. Сформулируй, зачем она и как будет называться, и дождись ответа.
+If a branch seems needed during the work, **ask for permission** rather than creating it. Say why it's needed and what it would be called, and wait for the answer.
 
-> Тут получается параллельная линия работы: старый парсер надо оставить рабочим, пока пишу новый. Завести под это ветку `parser-v2` в `.claude/`?
+> This turns into a parallel line of work: the old parser has to keep working while I write the new one. Shall I set up a `parser-v2` branch in `.claude/` for it?
 
-Если разрешение получено, ветка создаётся только как worktree внутри `.claude/`:
+With permission, create the branch only as a worktree inside `.claude/`:
 
 ```bash
-git worktree add .claude/<имя> -b <имя>
+git worktree add .claude/<name> -b <name>
 ```
 
-Никаких веток за пределами `.claude/` и никакого переключения основной рабочей папки на другую ветку.
+No branches outside `.claude/`, and the main working folder never switches to another branch.
 
-Такая ветка **никогда не пушится**. Убедись, что `.claude/` есть в `.gitignore` — если нет, добавь строку `.claude/` и скажи об этом пользователю.
+Such a branch is **never pushed**. Make sure `.claude/` is in `.gitignore`; if it isn't, add the line `.claude/` and tell the user.
 
-Когда работа закончена, изменения переносятся в основную рабочую папку, worktree удаляется (`git worktree remove`), ветка удаляется локально. На GitHub от неё не должно остаться следов.
+When the work is done, move the changes into the main working folder, remove the worktree (`git worktree remove`) and delete the branch locally. No trace of it should reach GitHub.
 
-### Коммит и пуш — разные команды
+### Commit and push are separate commands
 
-- «закоммить» → только `git commit`. Без пуша.
-- «запушь» / «пуш» → **спроси**, если есть незакоммиченные изменения: пушить только готовые коммиты или сначала закоммитить текущее. Если рабочее дерево чистое — просто пушь.
-- «закоммить и запушь» / «залей на гит» → коммит, затем пуш.
+- "закоммить" / "commit" → `git commit` only, no push.
+- "запушь" / "пуш" / "push" → if there are uncommitted changes, **ask** whether to push only the finished commits or commit the current changes first. If the working tree is clean, just push.
+- "закоммить и запушь" / "залей на гит" / "commit and push" → commit, then push.
 
-Никогда не додумывай пуш там, где его не просили.
+Never infer a push that wasn't asked for.
 
-### Коммит не является гейтом качества
+### A commit is not a quality gate
 
-Не превращай коммит в проверочный барьер: не запускай сборку, линтеры и тесты «чтобы убедиться, что можно коммитить», и не блокируй коммит их результатом. Когда пользователь говорит закоммитить — он уже проверил и уверен в работоспособности.
+Don't turn committing into a checkpoint: don't run the build, linters or tests "to make sure it can be committed", and don't block a commit on their results. When the user says commit, they have already checked it works.
 
-Это правило про git, а не про разработку. Обычная работа над кодом идёт как обычно: если в проекте есть тесты — прогоняй их после изменений, если по задаче нужно написать тесты — пиши, если есть линтер и он часть рабочего процесса — используй. Скилл не отменяет ничего из этого, он только запрещает вешать эти проверки на команду «закоммить».
+This is a rule about git, not about development. Normal work goes on as usual: if the project has tests, run them after changes; if the task calls for tests, write them; if a linter is part of the workflow, use it. This skill only forbids hanging those checks on the "commit" command.
 
-### AGENTS.md — всегда симлинк на CLAUDE.md
+### AGENTS.md is always a symlink to CLAUDE.md
 
-Инструкции для агента живут в одном файле — `CLAUDE.md`. `AGENTS.md` не копия и не второй набор правил, а симлинк: его содержимое — ровно одна строка `CLAUDE.md`, то есть путь до цели. Любой агент, который ищет `AGENTS.md`, читает тот же самый файл, и два набора правил не расходятся.
+Agent instructions live in one file, `CLAUDE.md`. `AGENTS.md` is not a copy or a second rule set but a symlink whose content is the single line `CLAUDE.md`, the path to its target. Any agent that looks for `AGENTS.md` reads the same file, so the two rule sets can't drift apart.
 
-Правило проверяется в двух точках: при инициализации репозитория и перед коммитом, если `CLAUDE.md` создавался или менялся.
+Check this at two points: when initializing a repository, and before a commit if `CLAUDE.md` was created or changed.
 
-Если `CLAUDE.md` есть, а `AGENTS.md` отсутствует или лежит обычным файлом — почини молча, разрешения не спрашивай: это настройка репозитория, а не фича. Просто скажи об этом в отчёте.
+If `CLAUDE.md` exists and `AGENTS.md` is missing or is a regular file, fix it without asking: this is repository setup, not a feature. Mention it in your report.
 
-### Что нельзя делать никогда
+### Never, without an explicit command
 
-- `git push --force` и любые перезаписи удалённой истории без явной команды.
-- `git reset --hard`, `git clean -fd`, откаты и удаление веток без явной команды — это потеря локальной работы, а локальное состояние здесь ценнее удалённого.
-- Коммитить секреты: `.env`, ключи, токены, креды. Перед коммитом бегло просмотри список файлов в стейдже — если что-то похоже на секрет, останови и спроси.
-- Добавлять в сообщение коммита любые подписи, кроме двух разрешённых (см. ниже).
+- `git push --force` or any rewrite of remote history.
+- `git reset --hard`, `git clean -fd`, reverts, or deleting branches: these lose local work, and local state matters more here than remote state.
 
-## Как создать симлинк средствами git
+And never at all:
 
-`ln -s` полагаться нельзя: на Windows он либо требует прав администратора, либо создаёт не то, а связка WSL + Git for Windows даёт несовместимые результаты. Поэтому симлинк создаётся напрямую в индексе — git хранит его как обычный блоб, где содержимое равно пути до цели, а режим файла равен `120000` (у обычного файла — `100644`).
+- Committing secrets: `.env`, keys, tokens, credentials. Before a commit, skim the staged file list; if anything looks like a secret, stop and ask.
+- Adding any signature to a commit message other than the one allowed trailer (see below).
+
+## Creating a symlink with git itself
+
+Don't rely on `ln -s`: on Windows it either needs admin rights or creates the wrong thing, and WSL plus Git for Windows give inconsistent results. Create the symlink directly in the index instead: git stores a symlink as an ordinary blob whose content is the target path, with file mode `120000` (a regular file is `100644`).
 
 ```bash
-# 1. кладём в объектную базу блоб с целью симлинка
+# 1. write a blob holding the symlink target into the object database
 hash=$(printf 'CLAUDE.md' | git hash-object -w --stdin)
 
-# 2. регистрируем запись в индексе с режимом симлинка
+# 2. register an index entry with the symlink mode
 git update-index --add --cacheinfo 120000,"$hash",AGENTS.md
 
-# 3. материализуем файл в рабочем дереве
+# 3. materialize the file in the working tree
 git checkout -- AGENTS.md
 ```
 
-Три вещи, на которых это ломается:
+Three ways this breaks:
 
-- **`printf`, а не `echo`.** `echo` добавляет `\n`, и цель ссылки становится `CLAUDE.md\n` — битый симлинк. Если всё же `echo`, то только `echo -n`.
-- **Цель относительно самого симлинка, а не абсолютный путь.** `AGENTS.md` и `CLAUDE.md` лежат рядом в корне репозитория, поэтому цель — просто `CLAUDE.md`. Абсолютный путь вроде `/home/user/proj/CLAUDE.md` сломается на любой другой машине.
-- **`--add` обязателен**, иначе git проигнорирует запись, которой ещё нет в индексе.
+- **`printf`, not `echo`.** `echo` appends `\n`, the target becomes `CLAUDE.md\n`, and the link is broken. If you must use `echo`, use `echo -n`.
+- **The target is relative to the symlink, not an absolute path.** `AGENTS.md` and `CLAUDE.md` sit side by side in the repository root, so the target is just `CLAUDE.md`. An absolute path like `/home/user/proj/CLAUDE.md` breaks on any other machine.
+- **`--add` is required**, otherwise git ignores an entry that isn't in the index yet.
 
-Проверка:
+Check:
 
 ```bash
 git ls-files -s AGENTS.md
-# ожидаем: 120000 <hash> 0 AGENTS.md
+# expected: 120000 <hash> 0 AGENTS.md
 ```
 
-Если в выводе `100644` — в индексе лежит обычный файл. Убери его из индекса (`git rm --cached AGENTS.md`), удали с диска и повтори шаги.
+If the output shows `100644`, the index holds a regular file. Remove it from the index (`git rm --cached AGENTS.md`), delete it from disk and repeat the steps.
 
-На Windows при `core.symlinks=false` checkout развернёт ссылку как текстовый файл со строкой `CLAUDE.md` внутри — в репозитории при этом запись остаётся настоящим симлинком, так что для GitHub и для агентов всё корректно. Если нужен рабочий симлинк локально — `git config core.symlinks true` плюс включённый Developer Mode в Windows.
+On Windows with `core.symlinks=false`, checkout writes the link as a text file containing `CLAUDE.md`. The repository entry is still a real symlink, so GitHub and agents see it correctly. For a working symlink locally, set `git config core.symlinks true` and enable Developer Mode in Windows.
 
-`git update-index` сразу кладёт запись в стейдж. Отдельного коммита это не требует и команды на коммит не даёт — но предупреди пользователя, что `AGENTS.md` уже в стейдже, иначе он неожиданно уедет в ближайший коммит, который делается по путям. Тип коммита для такой записи — `chore`:
+`git update-index` stages the entry right away. That needs no separate commit and is not a command to commit, but warn the user that `AGENTS.md` is now staged, or it will unexpectedly ride along in the next commit made by paths. The commit type for this entry is `chore`:
 
 → `chore: link AGENTS.md to CLAUDE.md`
 
-## Как делать коммит
+## Making a commit
 
-### 1. Посмотри, что изменилось
+### 1. Look at what changed
 
 ```bash
 git status
 git diff
 ```
 
-Сначала пойми содержание изменений, потом формулируй сообщение. Сообщение описывает **что и зачем поменялось**, а не «что попросил пользователь».
+Understand the changes first, then write the message. The message describes **what changed and why**, not "what the user asked for".
 
-### 2. Реши, сколько будет коммитов
+### 2. Decide how many commits
 
-Одну сессию работы можно и стоит разбить на несколько осмысленных коммитов, если изменения относятся к разным пластам. Это твоё решение — спрашивать разрешения не нужно.
+One session of work can and often should be split into several meaningful commits when the changes belong to different layers. That's your call; no need to ask.
 
-Естественные линии разреза:
+Natural split lines:
 
-- `docs` — README, документация, комментарии, changelog
-- `backend` — серверная логика, API, БД, миграции
-- `frontend` — UI, стили, клиентский код
-- `config` / `chore` — конфиги, зависимости, тулинг, CI
-- независимые фичи или багфиксы, попавшие в одну сессию
+- `docs`: README, documentation, comments, changelog
+- `backend`: server logic, API, database, migrations
+- `frontend`: UI, styles, client code
+- `config` / `chore`: configs, dependencies, tooling, CI
+- independent features or bug fixes that ended up in one session
 
-Если изменения — это одно связное целое, не дроби искусственно. Один осмысленный коммит лучше трёх формальных.
+If the changes form one coherent whole, don't split them artificially. One meaningful commit beats three formal ones.
 
-Стейдж по путям, а не `git add -A`, когда делишь на части:
+Stage by path rather than `git add -A` when splitting:
 
 ```bash
 git add docs/ README.md
@@ -158,71 +161,64 @@ git add src/api/
 git commit -m "feat(api): add pagination to /users"
 ```
 
-### 3. Формат сообщения: Conventional Commits, английский
+### 3. Message format: Conventional Commits, in English
 
 ```
-<type>(<scope>): <краткое описание в императиве, с маленькой буквы, без точки>
+<type>(<scope>): <short imperative description, lowercase, no trailing period>
 ```
 
-Типы: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`, `perf`, `build`, `ci`.
+Types: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`, `perf`, `build`, `ci`.
 
-Scope — опционален, но полезен: модуль, папка, подсистема.
+The scope is optional but useful: a module, folder or subsystem.
 
-**Примеры:**
+Examples:
 
-Изменение: добавлена JWT-авторизация в API
-→ `feat(auth): implement JWT-based authentication`
+- Added JWT authorization to the API → `feat(auth): implement JWT-based authentication`
+- Fixed a crash on an empty order list → `fix(orders): handle empty order list without crashing`
+- Rewrote the database access layer as repositories → `refactor(db): extract repository layer from services`
+- Updated dependencies and the build config → `chore(deps): bump vite and update build config`
 
-Изменение: исправлен краш при пустом списке заказов
-→ `fix(orders): handle empty order list without crashing`
+Add a body only when the change really needs explaining: why this approach, what will break, what's left open. A normal commit is one line.
 
-Изменение: переписан слой доступа к БД на репозитории
-→ `refactor(db): extract repository layer from services`
+### 4. The signature
 
-Изменение: обновлены зависимости и конфиг сборки
-→ `chore(deps): bump vite and update build config`
-
-Тело коммита добавляй только когда изменение действительно требует объяснения — почему выбран такой подход, что сломается, что осталось незакрытым. Обычный коммит — одна строка.
-
-### 4. Подпись в коммите
-
-Разрешена ровно одна строка, и только она:
+Exactly one trailer is allowed:
 
 ```
-Co-Authored-By: Claude <Модель> <Версия> <noreply@anthropic.com>
+Co-Authored-By: Claude <model and version> <noreply@anthropic.com>
 ```
 
-В `Co-Authored-By` подставляй модель и версию, которые реально ведут эту сессию, а не общее «Claude». Угловые скобки в git-трейлере занимает адрес почты, поэтому имя пишется без них:
+Use the model and version actually running this session, not a bare "Claude". The angle brackets in a git trailer hold the email address, so the name goes without them:
 
 ```
-Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
-Если модель и версию определить не удаётся — уточни у пользователя, а не пиши голое `Claude`.
+If you can't tell the model and version, ask the user rather than writing a bare `Claude`.
 
-**Строку `🤖 Generated with [Claude Code](…)` в коммит не пиши.** Она относится к телу pull request'а (ставится в самом конце) и в истории коммитов ей делать нечего. Если шаблон, инструкция или привычка тянут её в сообщение коммита — просто не добавляй.
+**Don't put `🤖 Generated with [Claude Code](…)` in a commit.** That line belongs at the end of a pull request body and has no place in commit history. If a template, instruction or habit pulls it into a commit message, leave it out.
 
-Никаких других футеров, трейлеров, эмодзи-подписей, ссылок на трекеры и упоминаний прочих инструментов в сообщении коммита быть не должно.
+No other footers, trailers, emoji signatures, tracker links or mentions of other tools belong in a commit message.
 
-## Как делать пуш
+## Pushing
 
 ```bash
 git push
 ```
 
-Ничего сверх этого. Не создавай upstream-ветки с новыми именами, не пушь теги без команды, не трогай удалённые ветки.
+Nothing beyond that. Don't create upstream branches with new names, don't push tags without a command, don't touch remote branches.
 
-Если пуш отклонён (non-fast-forward) — **не форсь и не мержи молча**. Покажи пользователю, что произошло, и спроси, как поступить.
+If the push is rejected (non-fast-forward), **don't force it and don't merge silently**. Show the user what happened and ask how to proceed.
 
-## Отчёт после работы с git
+## Report after git work
 
-После коммита/пуша коротко отчитайся: какие коммиты созданы (тип, scope, суть) и что ушло на удалённый репозиторий. Без длинных пересказов диффа — пользователь и так знает, что он писал.
+After a commit or push, report briefly: which commits were made (type, scope, gist) and what went to the remote. No long retelling of the diff; the user knows what was written.
 
-Пример:
+Example:
 
-> Сделал 2 коммита:
+> Made 2 commits:
 > - `docs: add worktree section to README`
 > - `feat(api): add pagination to /users`
 >
-> Запушено в `main`.
+> Pushed to `main`.

@@ -1,32 +1,21 @@
 ---
 name: prompt-guides
-description: Актуальные официальные гайды Anthropic по промптингу конкретных моделей Claude. Используй, когда пишешь или правишь промпт, системный промпт, описание скилла, инструкцию для субагента или CLAUDE.md, а также когда нужно свериться с рекомендациями по effort, thinking, tool use, форматированию вывода или миграции промпта на новую модель.
+description: Anthropic's current official prompting guides for specific Claude models, cached locally. Use when writing or editing a prompt, system prompt, skill description, subagent instruction or CLAUDE.md, and when checking recommendations on effort, thinking, tool use, output formatting, or migrating a prompt to a newer model.
 ---
 
-# Промпт-гайды Anthropic
+# Anthropic prompting guides
 
-Локальный кэш официальных доков обновляется хуком `SessionStart` этого плагина.
-Каталог кэша печатается в контекст при старте сессии; по умолчанию это
-`~/.claude/plugins/data/<id>/guides/`.
+A SessionStart hook of this plugin keeps a local cache of the official docs and prints the cache path into the session context. New model guides are picked up at the next session start; guides already cached are re-downloaded every 12 hours.
 
-## Порядок работы
+## How to use them
 
-1. Определи целевую модель. Если пользователь её не назвал — это модель,
-   на которой ты сейчас работаешь.
-2. Прочитай `<кэш>/prompting-claude-<модель>.md` — гайд именно по ней.
-   Файлы называются по слагам с сайта: `prompting-claude-opus-5.md`,
-   `prompting-claude-sonnet-5.md`, `prompting-claude-fable-5-1.md` и т.д.
-3. Только если нужны общие техники (XML-структура, few-shot, длинный контекст,
-   агентные системы) — читай `<кэш>/best-practices.md`.
-4. Применяй рекомендации к задаче. Не пересказывай гайд пользователю целиком:
-   он просил промпт, а не конспект доки.
+1. Pick the target model. If the user didn't name one, it's the model you are running on.
+2. Read `<cache>/prompting-claude-<model>.md`, the guide for that model. Files are named after the docs slugs: `prompting-claude-opus-5-5.md`, `prompting-claude-sonnet-5.md`, `prompting-claude-fable-5-1.md`, and so on.
+3. Read `<cache>/best-practices.md` only when you need general techniques (XML structure, few-shot examples, long context, agentic systems).
+4. Apply the recommendations to the task. The user asked for a prompt, not a summary of the docs, so don't retell the guide.
 
-## Важное
+## Notes
 
-- Гайд по конкретной модели старше общих рекомендаций: где они расходятся,
-  побеждает модельный.
-- Не переноси приёмы, измеренные на одной модели, на другую без перепроверки —
-  доки это оговаривают явно.
-- Если нужного файла в кэше нет, обновление ещё не отработало или упало.
-  Обнови вручную: `node "$CLAUDE_PLUGIN_ROOT/scripts/refresh-guides.mjs" < /dev/null`.
-  Не выдумывай содержимое гайда по памяти.
+- Where the model guide and the general best practices disagree, the model guide wins: it is the more specific and usually the newer of the two.
+- Don't carry a technique measured on one model over to another without re-checking; the docs say this explicitly.
+- If the guide you need isn't in the cache, run the manual refresh command printed in the session context. If it's still missing, fetch the page from platform.claude.com. Don't reconstruct a guide's content from memory.
