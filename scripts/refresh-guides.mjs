@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 /**
- * SessionStart hook: обновляет локальный кэш промпт-гайдов Anthropic
- * и отдаёт в контекст короткий указатель на него.
+ * SessionStart hook: refreshes the local cache of Anthropic's prompting guides
+ * and puts a short pointer to it into the session context.
  *
- * Требования: Node 18+ (global fetch). Никакого shell — работает как есть
- * на Windows, macOS и Linux.
+ * Requires Node 18+ (global fetch). No shell, so it runs as-is on Windows, macOS and Linux.
  *
- * Контракт хука:
- *   stdin  — JSON события (не используется, но вычитывается, чтобы не словить EPIPE)
- *   stdout — JSON с hookSpecificOutput.additionalContext
- *   exit   — всегда 0: сеть не должна ломать сессию (fail-open)
+ * Hook contract:
+ *   stdin  — the event JSON; unused, but drained to avoid EPIPE
+ *   stdout — JSON with hookSpecificOutput.additionalContext
+ *   exit   — always 0: a network failure must not break the session (fail-open)
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 
 const DOCS_ORIGIN = 'https://platform.claude.com';
 const INDEX_PATH = '/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices';
 const MODEL_GUIDE_RE = /\/docs\/en\/build-with-claude\/prompt-engineering\/(prompting-claude-[a-z0-9-]+)/g;
 
-const TTL_MS = 12 * 60 * 60 * 1000; // сутки пополам: доки живые, но не поминутные
+const TTL_MS = 12 * 60 * 60 * 1000; // re-download window for already cached guides; new ones are fetched immediately
 const FETCH_TIMEOUT_MS = 8_000;
 const CONCURRENCY = 4;
 
@@ -29,6 +29,7 @@ const CACHE_DIR = join(
   'guides',
 );
 const META_PATH = join(CACHE_DIR, 'meta.json');
+const SELF_PATH = fileURLToPath(import.meta.url);
 
 /* ------------------------------------------------------------------ utils */
 
@@ -59,7 +60,7 @@ const emit = (text) => {
   process.exit(0);
 };
 
-/** Мягкий HTML → текст на случай, если markdown-вариант страницы недоступен. */
+/** Rough HTML-to-text fallback for when the Markdown version of a page is unavailable. */
 const htmlToText = (html) =>
   html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -73,8 +74,8 @@ const htmlToText = (html) =>
     .trim();
 
 /**
- * Тянет страницу как markdown. Доки Anthropic — на Mintlify, где у любой
- * страницы есть .md-вариант; если он вдруг отдаст не то, откатываемся на HTML.
+ * Fetches a page as Markdown. Anthropic's docs serve a .md variant of every page;
+ * if that fails, fall back to the HTML page.
  */
 const fetchDoc = async (path, prevEtag) => {
   const headers = { 'user-agent': 'claude-prompt-guides/0.1' };
@@ -112,30 +113,32 @@ const mapWithLimit = async (items, limit, fn) => {
 
 const pointer = (slugs) =>
   [
-    'Актуальные промпт-гайды Anthropic закэшированы локально:',
+    "Anthropic's current prompting guides are cached locally in:",
     `  ${CACHE_DIR}`,
     `  best-practices.md${slugs.length ? `, ${slugs.map((s) => `${s}.md`).join(', ')}` : ''}`,
-    'Читай их через скилл prompt-guides, когда пишешь или правишь промпты,',
-    'системные промпты, скиллы или инструкции для агентов. Без надобности не открывай.',
+    'Read them through the zowork:prompt-guides skill when writing or editing prompts, system prompts,',
+    'skills or agent instructions; leave them closed otherwise.',
+    `Manual refresh: CLAUDE_PLUGIN_DATA="${dirname(CACHE_DIR)}" node "${SELF_PATH}" < /dev/null`,
   ].join('\n');
 
 await drainStdin();
 
 const meta = await readMeta();
-const knownSlugs = Object.keys(meta.entries ?? {});
-
-if (Date.now() - (meta.fetchedAt ?? 0) < TTL_MS && knownSlugs.length > 0) {
-  emit(pointer(knownSlugs)); // кэш свежий — в сеть не ходим вообще
-}
+meta.entries ??= {};
+const knownSlugs = Object.keys(meta.entries).filter((s) => s !== 'best-practices');
+const stale = Date.now() - (meta.fetchedAt ?? 0) >= TTL_MS;
 
 await mkdir(CACHE_DIR, { recursive: true });
 
-const index = await fetchDoc(INDEX_PATH, meta.entries?.['best-practices']?.etag);
+// The index is checked on every session start, not only after the TTL: otherwise a guide
+// published right after a refresh stays invisible for up to TTL_MS. The TTL only gates
+// re-downloading guides that are already cached.
+const index = await fetchDoc(INDEX_PATH, meta.entries['best-practices']?.etag);
 if (!index) {
-  emit(knownSlugs.length ? pointer(knownSlugs) : 'Промпт-гайды Anthropic сейчас недоступны (сеть).');
+  emit(knownSlugs.length ? pointer(knownSlugs) : "Anthropic's prompting guides are unavailable right now (network).");
 }
 
-let indexText = index.unchanged
+const indexText = index.unchanged
   ? await readFile(join(CACHE_DIR, 'best-practices.md'), 'utf8').catch(() => '')
   : index.text;
 
@@ -145,13 +148,14 @@ if (!index.unchanged) {
 }
 
 const slugs = [...new Set([...indexText.matchAll(MODEL_GUIDE_RE)].map((m) => m[1]))];
+const toFetch = stale ? slugs : slugs.filter((s) => !knownSlugs.includes(s));
 
-const results = await mapWithLimit(slugs, CONCURRENCY, async (slug) => {
+const results = await mapWithLimit(toFetch, CONCURRENCY, async (slug) => {
   const doc = await fetchDoc(
     `/docs/en/build-with-claude/prompt-engineering/${slug}`,
-    meta.entries?.[slug]?.etag,
+    meta.entries[slug]?.etag,
   );
-  if (!doc) return { slug, ok: knownSlugs.includes(slug) };
+  if (!doc) return { slug, ok: false };
   if (!doc.unchanged) {
     await writeFile(join(CACHE_DIR, `${slug}.md`), doc.text, 'utf8');
     meta.entries[slug] = { etag: doc.etag };
@@ -159,7 +163,15 @@ const results = await mapWithLimit(slugs, CONCURRENCY, async (slug) => {
   return { slug, ok: true };
 });
 
-meta.fetchedAt = Date.now();
+// A new guide that failed to download stays out of meta and is retried next session.
+const fetched = new Set(results.filter((r) => r.ok).map((r) => r.slug));
+const available = slugs.filter((s) => fetched.has(s) || knownSlugs.includes(s));
+const added = available.filter((s) => !knownSlugs.includes(s));
+
+if (stale) meta.fetchedAt = Date.now();
 await writeFile(META_PATH, JSON.stringify(meta, null, 2), 'utf8');
 
-emit(pointer(results.filter((r) => r.ok).map((r) => r.slug)));
+const note = added.length
+  ? `\nNewly cached since the last session: ${added.map((s) => `${s}.md`).join(', ')}.`
+  : '';
+emit(pointer(available) + note);
