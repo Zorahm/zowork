@@ -1,6 +1,7 @@
 ---
 name: antigravity
-description: Use when a task can be handed off to the Antigravity CLI agent (agy, Google Gemini) to save Claude tokens — multi-source web research, comparing libraries or products, collecting facts from docs and changelogs, summarizing long documentation, or bulk mechanical file work with a clear spec such as generating fixtures, translating string files, or reformatting data. Also use when the user says "загугли", "поищи в интернете", "отдай в antigravity", "отдай гуглу", or mentions Antigravity or agy.
+description: Delegate research and bulk mechanical file work to the Antigravity CLI agent (agy, Google Gemini) to save Claude tokens.
+when_to_use: Use when a task can be handed off to agy — multi-source web research, comparing libraries or products, collecting facts from docs and changelogs, summarizing long documentation, or bulk mechanical file work with a clear spec such as generating fixtures, translating string files, or reformatting data. Also use when the user says "загугли", "поищи в интернете", "отдай в antigravity", "отдай гуглу", or mentions Antigravity or agy.
 ---
 
 # Antigravity (agy)
