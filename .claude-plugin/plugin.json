@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "zowork",
   "displayName": "ZoWork",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "ZorahM's personal skills and automations: working rules injected at session start, a cache of Anthropic's prompting guides, git/GitHub rules for solo development, and task delegation to the Antigravity agent",
   "author": {
     "name": "ZorahM",
