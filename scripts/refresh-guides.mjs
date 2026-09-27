@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 /**
- * SessionStart hook: refreshes the local cache of Anthropic's prompting guides
- * and puts a short pointer to it into the session context.
+ * SessionStart hook (async): refreshes the local cache of Anthropic's prompting guides.
+ * The zowork:prompt-guides skill points at the cache itself, so nothing goes into the
+ * session context and a slow network never delays the start of a session.
  *
  * Requires Node 18+ (global fetch). No shell, so it runs as-is on Windows, macOS and Linux.
  *
  * Hook contract:
  *   stdin  — the event JSON; unused, but drained to avoid EPIPE
- *   stdout — JSON with hookSpecificOutput.additionalContext
+ *   stdout — empty
+ *   stderr — a one-line summary, for manual runs
  *   exit   — always 0: a network failure must not break the session (fail-open)
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { homedir } from 'node:os';
 
 const DOCS_ORIGIN = 'https://platform.claude.com';
@@ -29,7 +30,6 @@ const CACHE_DIR = join(
   'guides',
 );
 const META_PATH = join(CACHE_DIR, 'meta.json');
-const SELF_PATH = fileURLToPath(import.meta.url);
 
 /* ------------------------------------------------------------------ utils */
 
@@ -51,12 +51,8 @@ const readMeta = async () => {
   }
 };
 
-const emit = (text) => {
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: text },
-    }),
-  );
+const done = (text) => {
+  process.stderr.write(`${text}\n`);
   process.exit(0);
 };
 
@@ -111,16 +107,6 @@ const mapWithLimit = async (items, limit, fn) => {
 
 /* ------------------------------------------------------------------- main */
 
-const pointer = (slugs) =>
-  [
-    "Anthropic's current prompting guides are cached locally in:",
-    `  ${CACHE_DIR}`,
-    `  best-practices.md${slugs.length ? `, ${slugs.map((s) => `${s}.md`).join(', ')}` : ''}`,
-    'Read them through the zowork:prompt-guides skill when writing or editing prompts, system prompts,',
-    'skills or agent instructions; leave them closed otherwise.',
-    `Manual refresh: CLAUDE_PLUGIN_DATA="${dirname(CACHE_DIR)}" node "${SELF_PATH}" < /dev/null`,
-  ].join('\n');
-
 await drainStdin();
 
 const meta = await readMeta();
@@ -134,9 +120,7 @@ await mkdir(CACHE_DIR, { recursive: true });
 // published right after a refresh stays invisible for up to TTL_MS. The TTL only gates
 // re-downloading guides that are already cached.
 const index = await fetchDoc(INDEX_PATH, meta.entries['best-practices']?.etag);
-if (!index) {
-  emit(knownSlugs.length ? pointer(knownSlugs) : "Anthropic's prompting guides are unavailable right now (network).");
-}
+if (!index) done(`Network unavailable; ${knownSlugs.length} cached guide(s) left as they are in ${CACHE_DIR}.`);
 
 const indexText = index.unchanged
   ? await readFile(join(CACHE_DIR, 'best-practices.md'), 'utf8').catch(() => '')
@@ -171,7 +155,5 @@ const added = available.filter((s) => !knownSlugs.includes(s));
 if (stale) meta.fetchedAt = Date.now();
 await writeFile(META_PATH, JSON.stringify(meta, null, 2), 'utf8');
 
-const note = added.length
-  ? `\nNewly cached since the last session: ${added.map((s) => `${s}.md`).join(', ')}.`
-  : '';
-emit(pointer(available) + note);
+const note = added.length ? ` New: ${added.map((s) => `${s}.md`).join(', ')}.` : '';
+done(`${available.length} model guide(s) plus best-practices.md in ${CACHE_DIR}.${note}`);
