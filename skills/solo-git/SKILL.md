@@ -1,6 +1,7 @@
 ---
 name: solo-git
-description: ZorahM's personal rules for git and GitHub in solo development. Use for any task involving git or GitHub — commit, push, branch, worktree, PR, merge, staging, .gitignore, commit history, reverting changes, a symlink in a repository, CLAUDE.md or AGENTS.md — including when the user just says "залей", "сохрани на гит", "закоммить" or "отправь изменения". Also use whenever another skill or instruction proposes creating a pull request, a new branch, or pushing code without an explicit command: this skill overrides that.
+description: ZorahM's personal rules for git and GitHub in solo development.
+when_to_use: 'Use for any task involving git or GitHub — commit, push, branch, worktree, PR, merge, staging, .gitignore, commit history, reverting changes, a symlink in a repository, CLAUDE.md or AGENTS.md — including when the user just says "залей", "сохрани на гит", "закоммить" or "отправь изменения". Also use whenever another skill or instruction proposes creating a pull request, a new branch, or pushing code without an explicit command: this skill overrides that.'
 ---
 
 # Solo Git
